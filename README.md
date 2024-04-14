@@ -1,56 +1,33 @@
 
 # Welcome to your Python project
 
-This project is set up Python project with dev tooling pre-configured
-
-* black
-* flake8
-* isort
-* mypy
-* VS Code support
-
-## Setup
-
-The easiest way to get started is use [Visual Studio Code with devcontainer](https://code.visualstudio.com/docs/devcontainers/containers)
-
-The more traditional way is to install python 3.11 and [poetry](https://python-poetry.org/), then
-
+## quick start
 
 ```shell
 
-# create virtualenv
-poetry shell
+# create .env file with database details and DocumentAI API info
 
-# install dependencies
-poetry install --no-root --with linting
-```
+DATABASE_URL=postgres://@/ocr
+PROJECT_ID=<gcp_project_id>
+PROCESSOR_LOCATION=us
+PROCESSOR_ID=<documentai_processor_id>
+GOOGLE_APPLICATION_CREDENTIALS_JSON={"type":"service_account",...}
 
-## Develop the code for the stack
+# run the django application and djang-q worker
 
-```shell
+# with hivemind
+hivmind
 
-# update your DATABASE_URL is used
-# create database and assign proper privileges to the user
-# e.g.
-# create database mydb;
-# grant all privileges on database mydb to me;
+# without hivemind or similiar
 
-nano .env
+# in the first shell
+python manage.py runserver
 
-# run alembic migration
-alembic upgrade head
-
-# run unit tests
-pytest
+# in the 2nd shell
+python manage.py qcluster
 
 ```
 
-## generate code using config file without interactive input
+## open the browser to 
 
-Create a [config file](sample_prog.json) with options to use, then
-
-```shell
-
-cookiecutter gh:vino9org/cookiecutter-python --config-file sample_prog.json --no-input
-
-```
+[http://localhost:80000/statements/](http://localhost:80000/statements/)
