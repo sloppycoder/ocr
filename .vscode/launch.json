@@ -5,16 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
-            "type": "python",
+            "name": "runserver",
+            "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "program": "manage.py",
             "console": "integratedTerminal",
+            "args": [
+                "runserver",
+                "--noreload"
+            ],
             "justMyCode": false
         },
         {
             "name": "pytest",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "pytest",
             "justMyCode": false,
