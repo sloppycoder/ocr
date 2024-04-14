@@ -1,6 +1,8 @@
 asgiref==3.8.1 ; python_version >= "3.11" and python_version < "3.12"
 colorama==0.4.6 ; python_version >= "3.11" and python_version < "3.12" and sys_platform == "win32"
 dj-database-url==2.1.0 ; python_version >= "3.11" and python_version < "3.12"
+django-bootstrap5==24.1 ; python_version >= "3.11" and python_version < "3.12"
+django-tables2==2.7.0 ; python_version >= "3.11" and python_version < "3.12"
 django==5.0.4 ; python_version >= "3.11" and python_version < "3.12"
 gunicorn==21.2.0 ; python_version >= "3.11" and python_version < "3.12"
 loguru==0.7.2 ; python_version >= "3.11" and python_version < "3.12"
