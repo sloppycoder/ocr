@@ -7,6 +7,7 @@ from django.views.generic import FormView
 from django_tables2 import SingleTableView, tables
 
 from .models import Statement
+from .service import save_file
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,13 @@ class StatementTable(tables.Table):
     class Meta:
         model = Statement
         template_name = "django_tables2/bootstrap5.html"
-        fields = ("name", "mime_type", "content_sha", "submitted_at")
+        fields = (
+            "name",
+            "mime_type",
+            "content_sha",
+            "submitted_at",
+            "response_status",
+        )
 
 
 class StatementListView(SingleTableView):
@@ -45,7 +52,7 @@ class StatementUploadView(FormView):
         try:
             if mime_type in __ALLOWED_MIME_TYPES__:
                 uploaded_file = form.cleaned_data["uploaded_file"]
-                logging.info(f"uploading file {uploaded_file}")
+                save_file(file_name=file_name, mime_type=mime_type, file_content=uploaded_file.read())
                 messages.info(self.request, f"File {file_name} uploaded")
                 return super().form_valid(form)
             else:

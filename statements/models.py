@@ -1,6 +1,17 @@
 from django.db import models
 
 
+class ApiResponse(models.Model):
+    class Meta:
+        db_table = "api_responses"
+
+    mime_type = models.CharField(max_length=32)
+    content_sha = models.CharField(max_length=40, default="")
+    errors = models.CharField(max_length=2048, null=True)
+    response = models.BinaryField(null=True)
+    response_at = models.DateTimeField(auto_now_add=True)
+
+
 class Statement(models.Model):
     class Meta:
         db_table = "statements"
@@ -11,3 +22,11 @@ class Statement(models.Model):
     content_sha = models.CharField(max_length=40, default="")
     submitted_at = models.DateTimeField(auto_now_add=True)
     owner = models.CharField(max_length=64)
+    api_response = models.ForeignKey(ApiResponse, on_delete=models.SET_NULL, null=True)
+
+    @property
+    def response_status(self):
+        if self.api_response:
+            return "Success" if self.api_response.errors is None else "Error"
+        else:
+            return "Pending"
