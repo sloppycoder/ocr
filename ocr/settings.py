@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     # apps from packages
     "django_bootstrap5",
     "django_tables2",
+    "django_q",
     # apps in this project
     "statements",
 ]
@@ -82,8 +83,8 @@ WSGI_APPLICATION = "ocr.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL", "postgres://@/ocr"),
+    "default": dj_database_url.parse(
+        url=os.getenv("DATABASE_URL", "postgres://@/ocr"),
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -150,4 +151,15 @@ LOGGING = {
         "handlers": ["console"],
         "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
     },
+}
+
+Q_CLUSTER = {
+    "name": "DjangORM",
+    "workers": 1,
+    "max_attempts": 2,
+    "timeout": 180,
+    "retry": 200,
+    "queue_limit": 50,
+    "bulk": 2,
+    "orm": "default",
 }
