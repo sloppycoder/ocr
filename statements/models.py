@@ -30,3 +30,7 @@ class Statement(models.Model):
             return "Success" if self.api_response.errors is None else "Error"
         else:
             return "Pending"
+
+    @property
+    def sha7(self):
+        return self.content_sha[-7:]

@@ -21,7 +21,7 @@ class StatementTable(tables.Table):
         fields = (
             "name",
             "mime_type",
-            "content_sha",
+            "sha7",
             "submitted_at",
             "response_status",
         )
