@@ -73,7 +73,8 @@ jobs:
 
   buildx:
     needs: pytest
-    if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/main')
+    # if: startsWith(github.ref, 'refs/heads/develop') || startsWith(github.ref, 'refs/heads/main')
+    if: false
     runs-on: ubuntu-latest
 
     steps:
