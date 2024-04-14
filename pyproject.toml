@@ -58,13 +58,14 @@ line_length = 120
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = [
-    "tests",
+DJANGO_SETTINGS_MODULE = "ocr.settings_test"
+env_files = [
+    ".env.test",
 ]
 
 [tool.coverage.run]
 source = ["."]
-omit = ["tests/*"]
+omit = ["**/tests/*"]
 
 [tool.mypy]
 warn_return_any = false
