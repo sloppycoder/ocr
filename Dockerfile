@@ -1,7 +1,7 @@
 # stage 1: build
 FROM python:3.11-bullseye as builder
-LABEL org.opencontainers.image.source https://github.com/owner/ocr
-LABEL org.opencontainers.image.description "Use DocumentAI API to extract informatino from documents"
+LABEL org.opencontainers.image.source https://github.com/owner/ocr_proj
+LABEL org.opencontainers.image.description "OCR helpers"
 
 # install packages needed by python packages
 RUN apt-get update \
@@ -28,4 +28,6 @@ COPY --chown=app:app --from=builder /app/venv /app/venv
 COPY --chown=app:app . .
 
 ENV PATH="/app/venv/bin:$PATH"
-CMD  ["/bin/sleep", "100000"]
+CMD  ["/bin/sh", "/entrypoint.sh"]
+
+EXPOSE 8000
