@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import logging
 import pickle
@@ -109,3 +110,18 @@ def save_api_response(task):
 
     except Statement.DoesNotExist:
         logger.error(f"statement({statement_id}) not found, api response abandoned")
+
+
+def get_page_image(statement, page_no):
+    try:
+        api_response = pickle.loads(statement.api_response.response)
+        img_bytes = api_response.pages[page_no - 1].image.content
+
+        next_page = page_no + 1 if page_no < len(api_response.pages) else 0
+        prev_page = page_no - 1 if page_no > 1 else 0
+
+        return base64.b64encode(img_bytes).decode("utf-8"), prev_page, next_page
+
+    except Exception as e:
+        logger.error(f"failed to get page image: {e}")
+        return None

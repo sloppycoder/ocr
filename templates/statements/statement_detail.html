@@ -1,0 +1,41 @@
+{% extends 'statements/base.html' %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+Statement Detail
+{% endblock %}
+
+{% block heading %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        {% if prev_page > 0 %}
+        <div class="col-1">
+            <a href=".?page={{ prev_page }}">
+                <button class="btn btn-transparent">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </a>
+        </div>
+        {% endif %}
+        <div class=" col-10">
+            <img src="data:image/png;base64,{{ page_image }}" alt="{{ statement_name }}" class="img-fluid"
+                style="max-width: 100%; height: auto;">
+        </div>
+        {% if next_page > 0 %}
+        <div class="col-1">
+            <a href=".?page={{ next_page }}">
+                <button class="btn btn-transparent">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
