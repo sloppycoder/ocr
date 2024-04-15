@@ -2,8 +2,11 @@ import base64
 import hashlib
 import logging
 import pickle
+from io import BytesIO
 
 from django_q.tasks import async_task
+from google.cloud.documentai_v1.types.geometry import NormalizedVertex
+from PIL import Image, ImageDraw
 
 import ocr_engine.gcp  # noqa: F401
 
@@ -115,13 +118,60 @@ def save_api_response(task):
 def get_page_image(statement, page_no):
     try:
         api_response = pickle.loads(statement.api_response.response)
-        img_bytes = api_response.pages[page_no - 1].image.content
+        logger.info(f"statement {statement.name} page {page_no} has {len(api_response.entities)} entities")
+
+        image = Image.open(BytesIO(api_response.pages[page_no - 1].image.content))
+        draw = ImageDraw.Draw(image)
+
+        for entity in api_response.entities:
+            if entity.type_ == "acct":
+                color = "blue"
+                bounding_box = _find_overall_bounding_box_(entity, page_no)
+            elif entity.type_ == "trx":
+                color = "red"
+                bounding_box = _find_overall_bounding_box_(entity, page_no)
+            elif entity.type_ == "begin_of_table":
+                color = "grey"
+                bounding_box = entity.page_anchor.page_refs[0].bounding_poly.normalized_vertices
+            else:
+                next
+
+            vertices = [(vertex.x * image.width, vertex.y * image.height) for vertex in bounding_box]
+            draw.polygon(vertices, outline=color, width=2)
 
         next_page = page_no + 1 if page_no < len(api_response.pages) else 0
         prev_page = page_no - 1 if page_no > 1 else 0
 
-        return base64.b64encode(img_bytes).decode("utf-8"), prev_page, next_page
+        output_bytes = BytesIO()
+        image.save(output_bytes, format="PNG")
+
+        return base64.b64encode(output_bytes.getvalue()).decode("utf-8"), prev_page, next_page
 
     except Exception as e:
         logger.error(f"failed to get page image: {e}")
         return None
+
+
+def _find_overall_bounding_box_(entity, page_no):
+    """page_no is 1 based, not 0 based"""
+    # Initialize to maximum and minimum possible values
+    min_x, min_y = 1.0, 1.0
+    max_x, max_y = 0.0, 0.0
+
+    # Iterate through each box and its vertices
+    for prop in entity.properties:
+        page_ref = prop.page_anchor.page_refs[0]
+        for vertex in page_ref.bounding_poly.normalized_vertices:
+            if page_ref.page == page_no - 1:
+                min_x = min(min_x, vertex.x)
+                max_x = max(max_x, vertex.x)
+                min_y = min(min_y, vertex.y)
+                max_y = max(max_y, vertex.y)
+
+    # Return the overall bounding box
+    return [
+        NormalizedVertex(x=min_x, y=min_y),
+        NormalizedVertex(x=max_x, y=min_y),
+        NormalizedVertex(x=max_x, y=max_y),
+        NormalizedVertex(x=min_x, y=max_y),
+    ]
