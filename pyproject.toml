@@ -20,6 +20,7 @@ django-bootstrap5 = "^24.1"
 google-cloud-documentai = "^2.25.0"
 django-q2 = "^1.6.2"
 pillow = "^10.3.0"
+django-allauth = "^0.61.1"
 
 
 [build-system]

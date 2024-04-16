@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     "django_bootstrap5",
     "django_tables2",
     "django_q",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
     # apps in this project
     "statements",
 ]
@@ -56,6 +59,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "ocr.urls"
@@ -164,4 +168,22 @@ Q_CLUSTER = {
     "queue_limit": 50,
     "bulk": 2,
     "orm": "default",
+}
+
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+    # `allauth` specific authentication methods, such as login by email
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    # 'google': {
+    #     'APP': {
+    #         'client_id': '123',
+    #         'secret': '456',
+    #         'key': ''
+    #     }
+    # }
 }
