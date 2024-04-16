@@ -6,6 +6,7 @@ from typing import Optional
 from google.api_core.client_options import ClientOptions
 from google.cloud.documentai import DocumentProcessorServiceClient, ProcessRequest, RawDocument  # type: ignore
 from google.cloud.documentai_v1.types import Document
+from google.cloud.documentai_v1.types.geometry import NormalizedVertex
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ def process_document(
     location: str = os.getenv("PROCESSOR_LOCATION", "us"),
     processor_id: str = os.getenv("PROCESSOR_ID", ""),
     processor_version_id: Optional[str] = os.getenv("PROCESSOR_VERSION_ID"),
-    json_key: Optional[str] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON", "{}"),
+    json_key: str = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON", "{}"),
 ) -> Document:
 
     raw_document = RawDocument(content=image_content, mime_type=mime_type)
@@ -89,3 +90,35 @@ def process_document(
     logger.info(f"Processed: -> sha={content_sha[-7:]} {len(document.pages)} pages, {len(document.entities)} entities")
 
     return document
+
+
+def find_overall_bounding_box(entity, page_no):
+    """page_no is 1 based, not 0 based"""
+    # Initialize to maximum and minimum possible values
+    min_x, min_y = 1.0, 1.0
+    max_x, max_y = 0.0, 0.0
+
+    if entity.properties:
+        # Iterate through each box and its vertices
+        for prop in entity.properties:
+            page_ref = prop.page_anchor.page_refs[0]
+            for vertex in page_ref.bounding_poly.normalized_vertices:
+                if page_ref.page == page_no - 1:
+                    min_x = min(min_x, vertex.x)
+                    max_x = max(max_x, vertex.x)
+                    min_y = min(min_y, vertex.y)
+                    max_y = max(max_y, vertex.y)
+
+        # Return the overall bounding box
+        return [
+            NormalizedVertex(x=min_x, y=min_y),
+            NormalizedVertex(x=max_x, y=min_y),
+            NormalizedVertex(x=max_x, y=max_y),
+            NormalizedVertex(x=min_x, y=max_y),
+        ]
+    else:
+        page_ref = entity.page_anchor.page_refs[0]
+        if page_ref.page == page_no - 1:
+            return page_ref.bounding_poly.normalized_vertices
+
+    return None
