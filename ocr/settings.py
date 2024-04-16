@@ -178,6 +178,16 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 4,
+        },
+    }
+]
+
 SOCIALACCOUNT_PROVIDERS = {
     # 'google': {
     #     'APP': {

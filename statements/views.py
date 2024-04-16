@@ -3,6 +3,7 @@ import mimetypes
 
 from django import forms
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.urls import reverse
 from django.utils.html import format_html
@@ -39,11 +40,15 @@ class StatementTable(tables.Table):
             return "Pending"
 
 
-class StatementListView(SingleTableView):
+class StatementListView(LoginRequiredMixin, SingleTableView):
     model = Statement
     table_class = StatementTable
     template_name = "statement_list.html"
     table_pagination = {"per_page": 15}
+    login_url = "/accounts/login/"
+
+    def get_queryset(self):
+        return Statement.objects.filter(owner=self.request.user.username)
 
 
 class FileUploadForm(forms.Form):
@@ -51,10 +56,11 @@ class FileUploadForm(forms.Form):
     uploaded_file = forms.FileField(label="file")
 
 
-class StatementUploadView(FormView):
+class StatementUploadView(LoginRequiredMixin, FormView):
     form_class = FileUploadForm
     template_name = f"{app_name}/statement_upload.html"
     success_url = f"/{app_name}/"
+    login_url = "/accounts/login/"
 
     def form_valid(
         self,
@@ -65,7 +71,12 @@ class StatementUploadView(FormView):
         try:
             if mime_type in __ALLOWED_MIME_TYPES__:
                 uploaded_file = form.cleaned_data["uploaded_file"]
-                save_file(file_name=file_name, mime_type=mime_type, file_content=uploaded_file.read())
+                save_file(
+                    file_name=file_name,
+                    mime_type=mime_type,
+                    file_content=uploaded_file.read(),
+                    owner=self.request.user.username,
+                )
                 messages.info(self.request, f"File {file_name} uploaded")
                 return super().form_valid(form)
             else:
@@ -77,8 +88,9 @@ class StatementUploadView(FormView):
         return super().form_invalid(form)
 
 
-class StatementDetailView(TemplateView):
+class StatementDetailView(LoginRequiredMixin, TemplateView):
     template_name = f"{app_name}/statement_detail.html"
+    login_url = "/accounts/login/"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

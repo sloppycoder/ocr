@@ -32,12 +32,13 @@ def task_wrapper(func):
 process_document_wrapper = task_wrapper(ocr_engine.gcp.process_document)
 
 
-def save_file(file_name: str, mime_type: str, file_content: bytes):
+def save_file(file_name: str, mime_type: str, file_content: bytes, owner: str):
     statement = Statement.objects.create(
         name=file_name,
         mime_type=mime_type,
         content=file_content,
         content_sha=hashlib.sha1(file_content).hexdigest(),
+        owner=owner,
     )
 
     logger.info(f"saved Statement({statement.id}) for {file_name} {mime_type}")
