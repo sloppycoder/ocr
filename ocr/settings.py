@@ -137,7 +137,9 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "default": {
-            "format": os.getenv("LOGGING_FORMAT", "[%(asctime)s] [%(name)s] %(levelname)s %(message)s"),
+            # use the same format as gunicorn's log format to make thing for
+            # easier parsing
+            "format": os.getenv("LOGGING_FORMAT", "[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s"),
             "datefmt": "%Y-%m-%d %H:%M:%S %z",
         },
     },

@@ -17,5 +17,5 @@ fi
 gunicorn -w ${GUNICORN_WORKERS:-1} \
         ocr.wsgi:application \
         --access-logfile - \
-        --access-logformat '%(t)s [%(h)s] %(l)s "%(r)s"' \
+        --access-logformat '%(t)s [%(h)s] [%(l)s] "%(r)s" %(s)s %(b)s %(M)s' \
         --bind 0.0.0.0:8000
