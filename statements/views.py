@@ -42,6 +42,7 @@ class StatementListView(SingleTableView):
     model = Statement
     table_class = StatementTable
     template_name = "statement_list.html"
+    table_pagination = {"per_page": 15}
 
 
 class FileUploadForm(forms.Form):
