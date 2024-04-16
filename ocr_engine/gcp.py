@@ -92,8 +92,7 @@ def process_document(
     return document
 
 
-def find_overall_bounding_box(entity, page_no):
-    """page_no is 1 based, not 0 based"""
+def find_overall_bounding_box(entity):
     # Initialize to maximum and minimum possible values
     min_x, min_y = 1.0, 1.0
     max_x, max_y = 0.0, 0.0
@@ -103,11 +102,10 @@ def find_overall_bounding_box(entity, page_no):
         for prop in entity.properties:
             page_ref = prop.page_anchor.page_refs[0]
             for vertex in page_ref.bounding_poly.normalized_vertices:
-                if page_ref.page == page_no - 1:
-                    min_x = min(min_x, vertex.x)
-                    max_x = max(max_x, vertex.x)
-                    min_y = min(min_y, vertex.y)
-                    max_y = max(max_y, vertex.y)
+                min_x = min(min_x, vertex.x)
+                max_x = max(max_x, vertex.x)
+                min_y = min(min_y, vertex.y)
+                max_y = max(max_y, vertex.y)
 
         # Return the overall bounding box
         return [
@@ -118,7 +116,11 @@ def find_overall_bounding_box(entity, page_no):
         ]
     else:
         page_ref = entity.page_anchor.page_refs[0]
-        if page_ref.page == page_no - 1:
-            return page_ref.bounding_poly.normalized_vertices
+        return page_ref.bounding_poly.normalized_vertices
 
-    return None
+
+def find_page_for_entity(entity):
+    if entity.properties:
+        return entity.properties[0].page_anchor.page_refs[0].page
+    else:
+        return entity.page_anchor.page_refs[0].page

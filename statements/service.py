@@ -119,28 +119,31 @@ def save_api_response(task):
 def get_page_image(statement, page_no):
     try:
         api_response = pickle.loads(statement.api_response.response)
-        logger.info(f"statement {statement.name} page {page_no} has {len(api_response.entities)} entities")
 
         image = Image.open(BytesIO(api_response.pages[page_no - 1].image.content))
         draw = ImageDraw.Draw(image)
+        entities_found = 0
 
         for entity in api_response.entities:
             color = _TEXT_ENTITY_COLOR_.get(entity.type_)
             if not color:
                 next
 
-            bounding_box = ocr_engine.gcp.find_overall_bounding_box(entity, page_no)
-            if bounding_box:
+            if page_no == ocr_engine.gcp.find_page_for_entity(entity) + 1:
+                entities_found += 1
+                bounding_box = ocr_engine.gcp.find_overall_bounding_box(entity)
                 vertices = [(vertex.x * image.width, vertex.y * image.height) for vertex in bounding_box]
                 draw.polygon(vertices, outline=color, width=2)
 
         next_page = page_no + 1 if page_no < len(api_response.pages) else 0
         prev_page = page_no - 1 if page_no > 1 else 0
 
-        output_bytes = BytesIO()
-        image.save(output_bytes, format="PNG")
+        buffer = BytesIO()
+        image.save(buffer, format="PNG")
 
-        return base64.b64encode(output_bytes.getvalue()).decode("utf-8"), prev_page, next_page
+        logger.info(f"statement {statement.name} page {page_no} has {entities_found} entities")
+
+        return base64.b64encode(buffer.getvalue()).decode("utf-8"), prev_page, next_page
 
     except Exception as e:
         logger.error(f"failed to get page image: {e}")
