@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 __ALLOWED_MIME_TYPES__ = ["image/jpeg", "image/png", "application/pdf"]
 
-# this should be in sync urls.py
+# this should be in sync urls.py, duplicate here
+# because import urls will cause circular import
 app_name = "statements"
 
 
