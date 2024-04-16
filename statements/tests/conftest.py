@@ -2,23 +2,43 @@ import os
 import sys
 
 import pytest
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
+from django.test import Client
 
 from statements.models import ApiResponse, Statement
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(f"{cwd}/.."))
 
+_TEST_USERNAME_ = "appuser"
+_TEST_PASSWORD_ = "apppass"
+
 
 @pytest.fixture(scope="session")
 def django_db_setup(django_db_setup, django_db_blocker):
-    """
-    a memory database is setup automatically by django,
-    the schema is created so no need to run migration
-    """
     with django_db_blocker.unblock():
         call_command("migrate", interactive=False)
         seed_data()
+
+
+@pytest.fixture
+def user(db):
+    return get_user_model().objects.create_user(username=_TEST_USERNAME_, password=_TEST_PASSWORD_)
+
+
+@pytest.fixture
+def auth_client(user):
+    client = Client()
+    authenticated = client.login(username=_TEST_USERNAME_, password=_TEST_PASSWORD_)
+    assert authenticated
+    return client
+
+
+@pytest.fixture
+def logged_in_client(client, db):
+    client.login(username=_TEST_USERNAME_, password=_TEST_PASSWORD_)
+    yield client
 
 
 def seed_data():
