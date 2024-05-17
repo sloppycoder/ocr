@@ -3,7 +3,7 @@ from django.db import models
 
 class ApiResponse(models.Model):
     class Meta:
-        db_table = "api_responses"
+        db_table = "ocr_api_responses"
 
     mime_type = models.CharField(max_length=32)
     content_sha = models.CharField(max_length=40, default="")
@@ -14,7 +14,7 @@ class ApiResponse(models.Model):
 
 class Statement(models.Model):
     class Meta:
-        db_table = "statements"
+        db_table = "ocr_statements"
 
     name = models.CharField(max_length=64)
     mime_type = models.CharField(max_length=32)
