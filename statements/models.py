@@ -34,3 +34,22 @@ class Statement(models.Model):
     @property
     def sha7(self):
         return self.content_sha[-7:]
+
+
+class Transaction(models.Model):
+    class Meta:
+        db_table = "ocr_transactions"
+
+    trx_date = models.DateField(null=True)
+    account_num = models.TextField(max_length=12, null=True)
+    currency = models.TextField(null=True)
+    withdraw_amount = models.DecimalField(null=True, max_digits=20, decimal_places=2)
+    deposit_amount = models.DecimalField(null=True, max_digits=20, decimal_places=2)
+    balance = models.DecimalField(null=True, max_digits=20, decimal_places=2)
+    description = models.TextField(null=True)
+    statement = models.ForeignKey(Statement, on_delete=models.SET_NULL, related_name="transactions", null=True)
+    raw_entity = models.BinaryField(null=True)
+
+    def __str__(self):
+        desc = self.description[:10] if self.description else ""
+        return f"{self.trx_date}/{self.account_num}/{self.withdraw_amount}/{self.deposit_amount}/{self.balance}/{desc}"  # noqa E501
