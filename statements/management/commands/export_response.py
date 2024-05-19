@@ -18,7 +18,7 @@ class Command(BaseCommand):
         for statement in Statement.objects.all():
             name = statement.name
             if statement.api_response:
-                file_name = f"{dest_dir}/{name}_response.bin"
+                file_name = f"{dest_dir}/{name}".replace(".pdf", "_response.bin")
                 with open(file_name, "wb") as f:
                     f.write(statement.api_response.response)
                 print(f"Saved {file_name}")
