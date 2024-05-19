@@ -1,5 +1,7 @@
+import hashlib
 import os
 import sys
+from glob import glob
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -20,6 +22,7 @@ def django_db_setup(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         call_command("migrate", interactive=False)
         seed_data()
+        seed_confidential_data()
 
 
 @pytest.fixture
@@ -41,21 +44,33 @@ def logged_in_client(client, db):
     yield client
 
 
-def seed_data():
-    test_data_dir = os.path.join(os.path.dirname(__file__), "data")
+def _seed_statement_data_(statement_file: str, response_file: str):
+    with open(statement_file, "rb") as statement_f:
+        statement_content = statement_f.read()
+        content_sha = hashlib.sha1(statement_content).hexdigest()
 
-    with open(f"{test_data_dir}/test_api_response.bin", "rb") as invoice_f:
-        with open(f"{test_data_dir}/test_invoice.bin", "rb") as response_f:
+        with open(response_file, "rb") as response_f:
             response = ApiResponse.objects.create(
                 mime_type="application/pdf",
-                content_sha="58b4ab33560a9f953b8424ad228e0f5016e1ab96",
-                response=invoice_f.read(),
+                content_sha=content_sha,
+                response=response_f.read(),
             )
 
             Statement.objects.create(
-                name="test_invoice.pdf",
+                name=os.path.basename(statement_file),
                 mime_type="application/pdf",
-                content_sha="58b4ab33560a9f953b8424ad228e0f5016e1ab96",
-                content=response_f.read(),
+                content_sha=content_sha,
+                content=statement_content,
                 api_response=response,
             )
+
+
+def seed_data():
+    test_data_dir = os.path.join(os.path.dirname(__file__), "data")
+    _seed_statement_data_(f"{test_data_dir}/test_invoice.bin", f"{test_data_dir}/test_api_response.bin")
+
+
+def seed_confidential_data():
+    data_dir = os.environ.get("STATEMENTS_DIR", os.path.expanduser("~/Documents/hsbc_statements"))
+    for statement_file in glob(f"{data_dir}/*.pdf"):
+        _seed_statement_data_(statement_file, statement_file.replace(".pdf", "_response.bin"))
